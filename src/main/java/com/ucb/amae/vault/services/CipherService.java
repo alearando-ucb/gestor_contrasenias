@@ -4,11 +4,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.ucb.amae.vault.services.exceptions.CipherException;
+import com.ucb.amae.vault.services.exceptions.EncryptionException;
 
 public class CipherService {
     public static final int SALT_LENGTH = 16;
@@ -17,6 +21,8 @@ public class CipherService {
     public static final int DERIVED_KEY_LENGTH = 256;
 
     private static final int PBKDF2_ITERATIONS = 600_000;
+    private static final String AES_TRANSFORMATION = "AES/GCM/NoPadding";
+    private static final String AES_ALGORITHM = "AES";
 
     private final SecureRandom secureRandom;
     private final SecretKeyFactory keyFactory;
@@ -102,6 +108,17 @@ public class CipherService {
         ValidationService.validateIVNotNull(iv);
         ValidationService.validateIVNotEmpty(iv);
         ValidationService.validateIVLength(iv, IV_LENGTH);
-        return null;
+        try{
+            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, AES_ALGORITHM);
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(IV_LENGTH*8, iv);
+
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmParameterSpec);
+            byte[] encryptedData = cipher.doFinal(data);
+            return encryptedData;
+        }
+        catch(Exception e){
+            throw new EncryptionException("Error en el proceso de encriptación", e);
+        }
     }
 }
