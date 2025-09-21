@@ -326,6 +326,51 @@ public class CipherServiceTest {
 
         assertFalse(Arrays.equals(data, encryptedData), "Los datos cifrados deberían ser diferentes de los datos originales.");
     }
+
+    @Test
+    public void testEncrypt_SameInputs_ReturnsConsistentOutput() {
+        byte[] data = "Another secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] encryptedData1 = cipherService.encrypt(data, key, iv);
+        byte[] encryptedData2 = cipherService.encrypt(data, key, iv);
+
+        assertNotNull(encryptedData1);
+        assertNotNull(encryptedData2);
+        assertTrue(Arrays.equals(encryptedData1, encryptedData2), "Cifrar con los mismos inputs debería producir el mismo output.");
+    }
+
+    @Test
+    public void testEncrypt_DifferentIV_ReturnsDifferentOutput() {
+        byte[] data = "Yet another secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv1 = cipherService.generateIV();
+        byte[] iv2 = cipherService.generateIV();
+
+        byte[] encryptedData1 = cipherService.encrypt(data, key, iv1);
+        byte[] encryptedData2 = cipherService.encrypt(data, key, iv2);
+
+        assertNotNull(encryptedData1);
+        assertNotNull(encryptedData2);
+        assertFalse(Arrays.equals(encryptedData1, encryptedData2), "Cifrar con IVs diferentes debería producir outputs diferentes.");
+    }
+
+    @Test
+    public void testEncrypt_DifferentKey_ReturnsDifferentOutput() {
+        byte[] data = "Yet another secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] iv = cipherService.generateIV();
+
+        byte[] key1 = cipherService.generateMasterKey();
+        byte[] key2 = cipherService.generateMasterKey();
+
+        byte[] encryptedData1 = cipherService.encrypt(data, key1, iv);
+        byte[] encryptedData2 = cipherService.encrypt(data, key2, iv);
+
+        assertNotNull(encryptedData1);
+        assertNotNull(encryptedData2);
+        assertFalse(Arrays.equals(encryptedData1, encryptedData2), "Cifrar con claves diferentes debería producir outputs diferentes.");
+    }
 }
 
 
