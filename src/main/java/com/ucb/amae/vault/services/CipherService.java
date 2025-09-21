@@ -7,6 +7,7 @@ import com.ucb.amae.vault.services.exceptions.CipherException;
 public class CipherService {
     public static final int SALT_LENGTH = 16;
     public static final int IV_LENGTH = 12;
+    public static final int MASTER_KEY_LENGTH = 32; // 256 bits
 
     private final SecureRandom secureRandom;
 
@@ -40,6 +41,20 @@ public class CipherService {
         return iv;
         }catch(Exception e){
             throw new CipherException("Error generando el IV", e);
+        }
+    }
+
+    /*
+     * Genera una llave maestra aleatoria de 32 bytes (256 bits)
+     * @return byte[] La llave maestra generada
+     */
+    public byte[] generateMasterKey() {
+        try{
+            byte[] masterKey = new byte[MASTER_KEY_LENGTH];
+        secureRandom.nextBytes(masterKey);
+        return masterKey;
+        }catch(Exception e){
+            throw new CipherException("Error generando la llave maestra", e);
         }
     }
 
