@@ -62,6 +62,9 @@ public class CipherService {
 
         ValidationService.validatePasswordNotNull(password);
         ValidationService.validatePasswordNotEmpty(password);
+        ValidationService.validateSaltNotNull(salt);
+        ValidationService.validateSaltNotEmpty(salt);
+        ValidationService.validateSaltLength(salt, SALT_LENGTH);
 
         byte[] derivedKey = new byte[32];
         return derivedKey;
