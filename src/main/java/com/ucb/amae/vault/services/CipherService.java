@@ -123,6 +123,14 @@ public class CipherService {
     }
     
     public byte[] decrypt(byte[] encryptedData, byte[] key, byte[] iv) {
+        ValidationService.validateDataNotNull(encryptedData);
+        ValidationService.validateDataNotEmpty(encryptedData);
+        ValidationService.validateKeyNotNull(key);
+        ValidationService.validateKeyNotEmpty(key);
+        ValidationService.validateKeyLength(key, MASTER_KEY_LENGTH);
+        ValidationService.validateIVNotNull(iv);
+        ValidationService.validateIVNotEmpty(iv);
+        ValidationService.validateIVLength(iv, IV_LENGTH);
         return null;
     }
 }
