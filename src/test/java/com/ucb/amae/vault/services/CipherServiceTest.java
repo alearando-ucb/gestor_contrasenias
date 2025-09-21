@@ -371,6 +371,180 @@ public class CipherServiceTest {
         assertNotNull(encryptedData2);
         assertFalse(Arrays.equals(encryptedData1, encryptedData2), "Cifrar con claves diferentes debería producir outputs diferentes.");
     }
+
+    // --- Validation Tests for decrypt(byte[] encryptedData, byte[] key, byte[] iv) ---
+
+    @Test
+    public void testDecrypt_NullEncryptedData_ThrowsException() {
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(null, key, iv);
+        }, "Debería lanzar IllegalArgumentException para datos cifrados nulos.");
+    }
+
+    @Test
+    public void testDecrypt_EmptyEncryptedData_ThrowsException() {
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(new byte[0], key, iv);
+        }, "Debería lanzar IllegalArgumentException para datos cifrados vacíos.");
+    }
+
+    @Test
+    public void testDecrypt_NullKey_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, null, iv);
+        }, "Debería lanzar IllegalArgumentException para clave nula en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_EmptyKey_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, new byte[0], iv);
+        }, "Debería lanzar IllegalArgumentException para clave vacía en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_KeyTooShort_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] shortKey = new byte[CipherService.MASTER_KEY_LENGTH - 1];
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, shortKey, iv);
+        }, "Debería lanzar IllegalArgumentException para clave demasiado corta en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_KeyTooLong_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] longKey = new byte[CipherService.MASTER_KEY_LENGTH + 1];
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, longKey, iv);
+        }, "Debería lanzar IllegalArgumentException para clave demasiado larga en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_NullIV_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] key = cipherService.generateMasterKey();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, key, null);
+        }, "Debería lanzar IllegalArgumentException para IV nulo en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_EmptyIV_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] key = cipherService.generateMasterKey();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, key,new byte[0]);
+        }, "Debería lanzar IllegalArgumentException para IV vacío en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_IVTooShort_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] key = cipherService.generateMasterKey();
+        byte[] shortIV = new byte[CipherService.IV_LENGTH - 1];
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, key, shortIV);
+        }, "Debería lanzar IllegalArgumentException para IV demasiado corto en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_IVTooLong_ThrowsException() {
+        byte[] encryptedData = "test data".getBytes(); // Placeholder
+        byte[] key = cipherService.generateMasterKey();
+        byte[] longIV = new byte[CipherService.IV_LENGTH + 1];
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.decrypt(encryptedData, key, longIV);
+        }, "Debería lanzar IllegalArgumentException para IV demasiado largo en descifrado.");
+    }
+
+    @Test
+    public void testDecrypt_Success_ReturnsNonNullData() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+
+        assertNotNull(decryptedData, "Los datos descifrados no deberían ser nulos.");
+    }
+
+    @Test
+    public void testDecrypt_Success_ReturnsNonEmptyData() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+
+        assertTrue(decryptedData.length > 0, "Los datos descifrados no deberían estar vacíos.");
+    }
+
+    @Test
+    public void testDecrypt_Success_ReturnsDifferentDataFromOriginal() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+
+        assertFalse(Arrays.equals(originalData, decryptedData), "Los datos descifrados no deberían coincidir con los datos originales.");
+    }
+
+        @Test
+    public void testDecrypt_SameInputs_ReturnsConsistentOutput() {
+        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] decryptedData1 = cipherService.decrypt(data, key, iv);
+        byte[] decryptedData2 = cipherService.decrypt(data, key, iv);
+
+        assertNotNull(decryptedData1);
+        assertNotNull(decryptedData2);
+        assertTrue(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con los mismos inputs debería producir el mismo output.");
+    }
+
+    @Test
+    public void testDecrypt_DifferentIV_ReturnsDifferentOutput() {
+        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv1 = cipherService.generateIV();
+        byte[] iv2 = cipherService.generateIV();
+
+        byte[] decryptedData1 = cipherService.decrypt(data, key, iv1);
+        byte[] decryptedData2 = cipherService.decrypt(data, key, iv2);
+
+        assertNotNull(decryptedData1);
+        assertNotNull(decryptedData2);
+        assertFalse(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con IVs diferentes debería producir outputs diferentes.");
+    }
+
+    @Test
+    public void testDecrypt_DifferentKey_ReturnsDifferentOutput() {
+        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] iv = cipherService.generateIV();
+
+        byte[] key1 = cipherService.generateMasterKey();
+        byte[] key2 = cipherService.generateMasterKey();
+
+        byte[] decryptedData1 = cipherService.decrypt(data, key1, iv);
+        byte[] decryptedData2 = cipherService.decrypt(data, key2, iv);
+
+        assertNotNull(decryptedData1);
+        assertNotNull(decryptedData2);
+        assertFalse(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con claves diferentes debería producir outputs diferentes.");
+    }
 }
 
 

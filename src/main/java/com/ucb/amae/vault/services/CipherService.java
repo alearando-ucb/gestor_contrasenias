@@ -121,4 +121,8 @@ public class CipherService {
             throw new EncryptionException("Error en el proceso de encriptación", e);
         }
     }
+    
+    public byte[] decrypt(byte[] encryptedData, byte[] key, byte[] iv) {
+        return null;
+    }
 }
