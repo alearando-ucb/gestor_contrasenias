@@ -61,4 +61,22 @@ public class ValidationService {
             throw new IllegalArgumentException("La clave debe tener una longitud de " + expectedLength + " bytes.");
         }
     }
+
+    public static void validateIVNotNull(byte[] iv) {
+        if (iv == null) {
+            throw new IllegalArgumentException("El IV no puede ser nulo.");
+        }
+    }
+
+    public static void validateIVNotEmpty(byte[] iv) {
+        if (iv.length == 0) {
+            throw new IllegalArgumentException("El IV no puede estar vacío.");
+        }
+    }
+
+    public static void validateIVLength(byte[] iv, int expectedLength) {
+        if (iv.length != expectedLength) {
+            throw new IllegalArgumentException("El IV debe tener una longitud de " + expectedLength + " bytes.");
+        }
+    }
 }
