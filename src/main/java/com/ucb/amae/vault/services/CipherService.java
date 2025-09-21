@@ -12,6 +12,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.ucb.amae.vault.services.exceptions.CipherException;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 import com.ucb.amae.vault.services.exceptions.EncryptionException;
 
 public class CipherService {
@@ -19,6 +20,7 @@ public class CipherService {
     public static final int IV_LENGTH = 12;
     public static final int MASTER_KEY_LENGTH = 32;
     public static final int DERIVED_KEY_LENGTH = 256;
+    public static final int AUTH_TAG_SIZE = 16;
 
     private static final int PBKDF2_ITERATIONS = 600_000;
     private static final String AES_TRANSFORMATION = "AES/GCM/NoPadding";
@@ -131,6 +133,23 @@ public class CipherService {
         ValidationService.validateIVNotNull(iv);
         ValidationService.validateIVNotEmpty(iv);
         ValidationService.validateIVLength(iv, IV_LENGTH);
-        return null;
+        try{
+            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+            SecretKeySpec keySpec = new SecretKeySpec(key, AES_ALGORITHM);
+            GCMParameterSpec gcmSpec = new GCMParameterSpec(AUTH_TAG_SIZE * 8, iv);
+
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
+            
+            byte[] decryptedData = cipher.doFinal(encryptedData);
+            
+            return decryptedData;
+        }catch (javax.crypto.AEADBadTagException e) {
+            throw new DecryptionException("Authentication failed - data may be corrupted or tampered", e);
+        } catch (javax.crypto.BadPaddingException e) {
+            throw new DecryptionException("Decryption failed - invalid key or corrupted data", e);
+        }catch(Exception e){
+            throw new DecryptionException("Error en el proceso de desencriptación", e);
+        }
+
     }
 }

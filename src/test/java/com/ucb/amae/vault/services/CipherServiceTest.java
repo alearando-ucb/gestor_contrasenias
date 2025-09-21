@@ -474,7 +474,8 @@ public class CipherServiceTest {
         byte[] key = cipherService.generateMasterKey();
         byte[] iv = cipherService.generateIV();
 
-        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+        byte[] encryptedData = cipherService.encrypt(originalData, key, iv);
+        byte[] decryptedData = cipherService.decrypt(encryptedData, key, iv);
 
         assertNotNull(decryptedData, "Los datos descifrados no deberían ser nulos.");
     }
@@ -485,20 +486,22 @@ public class CipherServiceTest {
         byte[] key = cipherService.generateMasterKey();
         byte[] iv = cipherService.generateIV();
 
-        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+        byte[] encryptedData = cipherService.encrypt(originalData, key, iv);
+        byte[] decryptedData = cipherService.decrypt(encryptedData, key, iv);
 
         assertTrue(decryptedData.length > 0, "Los datos descifrados no deberían estar vacíos.");
     }
 
     @Test
-    public void testDecrypt_Success_ReturnsDifferentDataFromOriginal() {
+    public void testDecrypt_Success_ReturnsSameDataAsOriginal() {
         byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
         byte[] key = cipherService.generateMasterKey();
         byte[] iv = cipherService.generateIV();
 
-        byte[] decryptedData = cipherService.decrypt(originalData, key, iv);
+        byte[] encryptedData = cipherService.encrypt(originalData, key, iv);
+        byte[] decryptedData = cipherService.decrypt(encryptedData, key, iv);
 
-        assertFalse(Arrays.equals(originalData, decryptedData), "Los datos descifrados no deberían coincidir con los datos originales.");
+        assertEquals(originalData, decryptedData, "Los datos descifrados no deberían coincidir con los datos originales.");
     }
 
         @Test
