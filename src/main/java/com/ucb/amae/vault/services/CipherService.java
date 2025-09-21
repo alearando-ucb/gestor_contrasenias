@@ -113,7 +113,7 @@ public class CipherService {
         try{
             Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
             SecretKeySpec secretKeySpec = new SecretKeySpec(key, AES_ALGORITHM);
-            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(IV_LENGTH*8, iv);
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(AUTH_TAG_SIZE*8, iv);
 
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmParameterSpec);
             byte[] encryptedData = cipher.doFinal(data);

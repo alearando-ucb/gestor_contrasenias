@@ -501,7 +501,7 @@ public class CipherServiceTest {
         byte[] encryptedData = cipherService.encrypt(originalData, key, iv);
         byte[] decryptedData = cipherService.decrypt(encryptedData, key, iv);
 
-        assertEquals(originalData, decryptedData, "Los datos descifrados no deberían coincidir con los datos originales.");
+        assertArrayEquals(originalData, decryptedData, "Los datos descifrados deberían coincidir con los datos originales.");
     }
 
         @Test
