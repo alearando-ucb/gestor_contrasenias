@@ -1,18 +1,33 @@
 package com.ucb.amae.vault.services;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.KeySpec;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import com.ucb.amae.vault.services.exceptions.CipherException;
 
 public class CipherService {
     public static final int SALT_LENGTH = 16;
     public static final int IV_LENGTH = 12;
-    public static final int MASTER_KEY_LENGTH = 32; // 256 bits
+    public static final int MASTER_KEY_LENGTH = 32;
+    public static final int DERIVED_KEY_LENGTH = 256;
+
+    private static final int PBKDF2_ITERATIONS = 600_000;
 
     private final SecureRandom secureRandom;
+    private final SecretKeyFactory keyFactory;
 
     public CipherService() {
-        this.secureRandom = new SecureRandom();
+        try {
+            this.secureRandom = new SecureRandom();
+            this.keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new CipherException("Failed to initialize cryptographic components", e);
+        }
     }
 
     /*
@@ -66,7 +81,15 @@ public class CipherService {
         ValidationService.validateSaltNotEmpty(salt);
         ValidationService.validateSaltLength(salt, SALT_LENGTH);
 
-        return null;
+        try{
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, PBKDF2_ITERATIONS, DERIVED_KEY_LENGTH);
+            SecretKey secretKey = keyFactory.generateSecret(spec);
+            byte[] derivedKey = secretKey.getEncoded();
+            return derivedKey;
+
+        }catch(Exception e){
+            throw new CipherException("Error derivando la llave", e);
+        }
 
     }
 }
