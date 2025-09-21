@@ -293,6 +293,39 @@ public class CipherServiceTest {
             cipherService.encrypt(data, key, longIV);
         }, "Debería lanzar IllegalArgumentException para IV demasiado largo.");
     }
+
+    @Test
+    public void testEncrypt_Success_ReturnsNonNullData() {
+        byte[] data = "This is a secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] encryptedData = cipherService.encrypt(data, key, iv);
+
+        assertNotNull(encryptedData, "Los datos cifrados no deberían ser nulos.");
+    }
+
+    @Test
+    public void testEncrypt_Success_ReturnsNonEmptyData() {
+        byte[] data = "This is a secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] encryptedData = cipherService.encrypt(data, key, iv);
+
+        assertTrue(encryptedData.length > 0, "Los datos cifrados no deberían estar vacíos.");
+    }
+
+    @Test
+    public void testEncrypt_Success_ReturnsDifferentDataFromOriginal() {
+        byte[] data = "This is a secret message.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+
+        byte[] encryptedData = cipherService.encrypt(data, key, iv);
+
+        assertFalse(Arrays.equals(data, encryptedData), "Los datos cifrados deberían ser diferentes de los datos originales.");
+    }
 }
 
 
