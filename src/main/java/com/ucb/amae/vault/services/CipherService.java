@@ -58,5 +58,13 @@ public class CipherService {
         }
     }
 
+    public byte[] deriveKey(String password, byte[] salt) {
 
+        ValidationService.validatePasswordNotNull(password);
+        ValidationService.validatePasswordNotEmpty(password);
+
+        byte[] derivedKey = new byte[32];
+        return derivedKey;
+
+    }
 }

@@ -100,6 +100,14 @@ public class CipherServiceTest {
             cipherService.deriveKey("", salt);
         }, "Debería lanzar IllegalArgumentException para contraseña vacía.");
     }
+    
+    @Test
+    public void testDeriveKey_PasswordOnlyWhitespace_ThrowsException() {
+        byte[] salt = cipherService.generateSalt();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey("   ", salt); // Password with only spaces
+        }, "Debería lanzar IllegalArgumentException para contraseña con solo espacios en blanco.");
+    }
 
     @Test
     public void testDeriveKey_NullSalt_ThrowsException() {
