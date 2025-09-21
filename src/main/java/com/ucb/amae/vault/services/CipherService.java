@@ -96,6 +96,9 @@ public class CipherService {
     public byte[] encrypt(byte[] data, byte[] key, byte[] iv){
         ValidationService.validateDataNotNull(data);
         ValidationService.validateDataNotEmpty(data);
+        ValidationService.validateKeyNotNull(key);
+        ValidationService.validateKeyNotEmpty(key);
+        ValidationService.validateKeyLength(key, MASTER_KEY_LENGTH);
         return null;
     }
 }

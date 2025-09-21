@@ -43,4 +43,22 @@ public class ValidationService {
             throw new IllegalArgumentException("Los datos no pueden estar vacíos.");
         }
     }
+
+    public static void validateKeyNotNull(byte[] key) {
+        if (key == null) {
+            throw new IllegalArgumentException("La clave no puede ser nula.");
+        }
+    }
+
+    public static void validateKeyNotEmpty(byte[] key) {
+        if (key.length == 0) {
+            throw new IllegalArgumentException("La clave no puede estar vacía.");
+        }
+    }
+
+    public static void validateKeyLength(byte[] key, int expectedLength) {
+        if (key.length != expectedLength) {
+            throw new IllegalArgumentException("La clave debe tener una longitud de " + expectedLength + " bytes.");
+        }
+    }
 }
