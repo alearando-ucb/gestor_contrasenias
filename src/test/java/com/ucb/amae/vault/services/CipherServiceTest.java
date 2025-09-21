@@ -82,5 +82,58 @@ public class CipherServiceTest {
         assertNotNull(masterKey2);
         assertFalse(Arrays.equals(masterKey1, masterKey2), "Dos claves maestras generadas aleatoriamente no deberían ser iguales.");
     }
+
+    // --- New Validation Tests for deriveKey(String password, byte[] salt) --- 
+
+    @Test
+    public void testDeriveKey_NullPassword_ThrowsException() {
+        byte[] salt = cipherService.generateSalt();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey(null, salt);
+        }, "Debería lanzar IllegalArgumentException para contraseña nula.");
+    }
+
+    @Test
+    public void testDeriveKey_EmptyPassword_ThrowsException() {
+        byte[] salt = cipherService.generateSalt();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey("", salt);
+        }, "Debería lanzar IllegalArgumentException para contraseña vacía.");
+    }
+
+    @Test
+    public void testDeriveKey_NullSalt_ThrowsException() {
+        String password = "testPassword";
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey(password, null);
+        }, "Debería lanzar IllegalArgumentException para salt nulo.");
+    }
+
+    @Test
+    public void testDeriveKey_EmptySalt_ThrowsException() {
+        String password = "testPassword";
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey(password, new byte[0]);
+        }, "Debería lanzar IllegalArgumentException para salt vacío.");
+    }
+
+    @Test
+    public void testDeriveKey_SaltTooShort_ThrowsException() {
+        String password = "testPassword";
+        byte[] shortSalt = new byte[7]; // Assuming 8 bytes is minimum, 16 is ideal
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey(password, shortSalt);
+        }, "Debería lanzar IllegalArgumentException para salt demasiado corto.");
+    }
+
+    @Test
+    public void testDeriveKey_SaltTooLong_ThrowsException() {
+        String password = "testPassword";
+        byte[] longSalt = new byte[33]; // Assuming 32 bytes is max, 16 is ideal
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey(password, longSalt);
+        }, "Debería lanzar IllegalArgumentException para salt demasiado largo.");
+    }
 }
+
 
