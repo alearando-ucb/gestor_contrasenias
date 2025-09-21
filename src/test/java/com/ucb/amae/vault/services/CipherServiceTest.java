@@ -83,7 +83,7 @@ public class CipherServiceTest {
         assertFalse(Arrays.equals(masterKey1, masterKey2), "Dos claves maestras generadas aleatoriamente no deberían ser iguales.");
     }
 
-    // --- New Validation Tests for deriveKey(String password, byte[] salt) --- 
+    // --- Validation Tests for deriveKey(String password, byte[] salt) --- 
 
     @Test
     public void testDeriveKey_NullPassword_ThrowsException() {
@@ -99,14 +99,6 @@ public class CipherServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             cipherService.deriveKey("", salt);
         }, "Debería lanzar IllegalArgumentException para contraseña vacía.");
-    }
-    
-    @Test
-    public void testDeriveKey_PasswordOnlyWhitespace_ThrowsException() {
-        byte[] salt = cipherService.generateSalt();
-        assertThrows(IllegalArgumentException.class, () -> {
-            cipherService.deriveKey("   ", salt); // Password with only spaces
-        }, "Debería lanzar IllegalArgumentException para contraseña con solo espacios en blanco.");
     }
 
     @Test
@@ -141,6 +133,69 @@ public class CipherServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             cipherService.deriveKey(password, longSalt);
         }, "Debería lanzar IllegalArgumentException para salt demasiado largo.");
+    }
+
+    @Test
+    public void testDeriveKey_PasswordOnlyWhitespace_ThrowsException() {
+        byte[] salt = cipherService.generateSalt();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.deriveKey("   ", salt); // Password with only spaces
+        }, "Debería lanzar IllegalArgumentException para contraseña con solo espacios en blanco.");
+    }
+
+    // --- New Happy Path Tests for deriveKey(String password, byte[] salt) --- 
+
+    @Test
+    public void testDeriveKey_Success_ReturnsValidKey() {
+        String password = "testPassword";
+        byte[] salt = cipherService.generateSalt(); // Use existing salt generation
+
+        // This will fail until deriveKey is fully implemented
+        byte[] derivedKey = cipherService.deriveKey(password, salt);
+
+        assertNotNull(derivedKey, "La clave derivada no debería ser nula.");
+        assertEquals(32, derivedKey.length, "La clave derivada debería tener una longitud de 32 bytes (AES-256).");
+    }
+
+    @Test
+    public void testDeriveKey_SamePasswordSalt_ReturnsConsistentKey() {
+        String password = "testPassword";
+        byte[] salt = cipherService.generateSalt();
+
+        byte[] derivedKey1 = cipherService.deriveKey(password, salt);
+        byte[] derivedKey2 = cipherService.deriveKey(password, salt);
+
+        assertNotNull(derivedKey1);
+        assertNotNull(derivedKey2);
+        assertTrue(Arrays.equals(derivedKey1, derivedKey2), "La clave derivada debería ser consistente para la misma contraseña y salt.");
+    }
+
+    @Test
+    public void testDeriveKey_DifferentPassword_ReturnsDifferentKey() {
+        String passwordA = "passwordA";
+        String passwordB = "passwordB";
+        byte[] salt = cipherService.generateSalt();
+
+        byte[] derivedKeyA = cipherService.deriveKey(passwordA, salt);
+        byte[] derivedKeyB = cipherService.deriveKey(passwordB, salt);
+
+        assertNotNull(derivedKeyA);
+        assertNotNull(derivedKeyB);
+        assertFalse(Arrays.equals(derivedKeyA, derivedKeyB), "Claves derivadas diferentes para contraseñas diferentes.");
+    }
+
+    @Test
+    public void testDeriveKey_DifferentSalt_ReturnsDifferentKey() {
+        String password = "testPassword";
+        byte[] salt1 = cipherService.generateSalt();
+        byte[] salt2 = cipherService.generateSalt();
+
+        byte[] derivedKey1 = cipherService.deriveKey(password, salt1);
+        byte[] derivedKey2 = cipherService.deriveKey(password, salt2);
+
+        assertNotNull(derivedKey1);
+        assertNotNull(derivedKey2);
+        assertFalse(Arrays.equals(derivedKey1, derivedKey2), "Claves derivadas diferentes para salts diferentes.");
     }
 }
 

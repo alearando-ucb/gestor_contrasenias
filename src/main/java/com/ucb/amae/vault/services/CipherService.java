@@ -66,8 +66,7 @@ public class CipherService {
         ValidationService.validateSaltNotEmpty(salt);
         ValidationService.validateSaltLength(salt, SALT_LENGTH);
 
-        byte[] derivedKey = new byte[32];
-        return derivedKey;
+        return null;
 
     }
 }
