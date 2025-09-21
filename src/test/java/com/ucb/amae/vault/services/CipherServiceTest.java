@@ -197,6 +197,102 @@ public class CipherServiceTest {
         assertNotNull(derivedKey2);
         assertFalse(Arrays.equals(derivedKey1, derivedKey2), "Claves derivadas diferentes para salts diferentes.");
     }
+
+    // --- Validation Tests for encrypt(byte[] data, byte[] key, byte[] iv) ---
+
+    @Test
+    public void testEncrypt_NullData_ThrowsException() {
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(null, key, iv);
+        }, "Debería lanzar IllegalArgumentException para datos nulos.");
+    }
+
+    @Test
+    public void testEncrypt_EmptyData_ThrowsException() {
+        byte[] key = cipherService.generateMasterKey();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(new byte[0], key, iv);
+        }, "Debería lanzar IllegalArgumentException para datos vacíos.");
+    }
+
+    @Test
+    public void testEncrypt_NullKey_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, null, iv);
+        }, "Debería lanzar IllegalArgumentException para clave nula.");
+    }
+
+    @Test
+    public void testEncrypt_EmptyKey_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, new byte[0], iv);
+        }, "Debería lanzar IllegalArgumentException para clave vacía.");
+    }
+
+    @Test
+    public void testEncrypt_KeyTooShort_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] shortKey = new byte[CipherService.MASTER_KEY_LENGTH - 1];
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, shortKey, iv);
+        }, "Debería lanzar IllegalArgumentException para clave demasiado corta.");
+    }
+
+    @Test
+    public void testEncrypt_KeyTooLong_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] longKey = new byte[CipherService.MASTER_KEY_LENGTH + 1];
+        byte[] iv = cipherService.generateIV();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, longKey, iv);
+        }, "Debería lanzar IllegalArgumentException para clave demasiado larga.");
+    }
+
+    @Test
+    public void testEncrypt_NullIV_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] key = cipherService.generateMasterKey();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, key, null);
+        }, "Debería lanzar IllegalArgumentException para IV nulo.");
+    }
+
+    @Test
+    public void testEncrypt_EmptyIV_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] key = cipherService.generateMasterKey();
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, key, new byte[0]);
+        }, "Debería lanzar IllegalArgumentException para IV vacío.");
+    }
+
+    @Test
+    public void testEncrypt_IVTooShort_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] key = cipherService.generateMasterKey();
+        byte[] shortIV = new byte[CipherService.IV_LENGTH - 1];
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, key, shortIV);
+        }, "Debería lanzar IllegalArgumentException para IV demasiado corto.");
+    }
+
+    @Test
+    public void testEncrypt_IVTooLong_ThrowsException() {
+        byte[] data = "test data".getBytes();
+        byte[] key = cipherService.generateMasterKey();
+        byte[] longIV = new byte[CipherService.IV_LENGTH + 1];
+        assertThrows(IllegalArgumentException.class, () -> {
+            cipherService.encrypt(data, key, longIV);
+        }, "Debería lanzar IllegalArgumentException para IV demasiado largo.");
+    }
 }
 
 

@@ -92,4 +92,8 @@ public class CipherService {
         }
 
     }
+
+    public byte[] encrypt(byte[] data, byte[] key, byte[] iv){
+        return null;
+    }
 }
