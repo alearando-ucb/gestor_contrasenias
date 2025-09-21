@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays; // Import Arrays for byte[] comparison
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 
 public class CipherServiceTest {
 
@@ -198,7 +199,7 @@ public class CipherServiceTest {
         assertFalse(Arrays.equals(derivedKey1, derivedKey2), "Claves derivadas diferentes para salts diferentes.");
     }
 
-    // --- Validation Tests for encrypt(byte[] data, byte[] key, byte[] iv) ---
+    // --- Validation Tests for encrypt(byte[] data, byte[] key, byte[] iv) --- 
 
     @Test
     public void testEncrypt_NullData_ThrowsException() {
@@ -504,50 +505,47 @@ public class CipherServiceTest {
         assertArrayEquals(originalData, decryptedData, "Los datos descifrados deberían coincidir con los datos originales.");
     }
 
-        @Test
-    public void testDecrypt_SameInputs_ReturnsConsistentOutput() {
-        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        byte[] key = cipherService.generateMasterKey();
+    @Test
+    public void testDecrypt_DifferentKey_ThrowsDecryptionException() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] correctKey = cipherService.generateMasterKey();
+        byte[] wrongKey = cipherService.generateMasterKey();
         byte[] iv = cipherService.generateIV();
 
-        byte[] decryptedData1 = cipherService.decrypt(data, key, iv);
-        byte[] decryptedData2 = cipherService.decrypt(data, key, iv);
+        byte[] encryptedData = cipherService.encrypt(originalData, correctKey, iv);
 
-        assertNotNull(decryptedData1);
-        assertNotNull(decryptedData2);
-        assertTrue(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con los mismos inputs debería producir el mismo output.");
+        assertThrows(DecryptionException.class, () -> {
+            cipherService.decrypt(encryptedData, wrongKey, iv);
+        }, "Debería lanzar DecryptionException al intentar descifrar con una clave incorrecta.");
     }
 
     @Test
-    public void testDecrypt_DifferentIV_ReturnsDifferentOutput() {
-        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    public void testDecrypt_DifferentIV_ThrowsDecryptionException() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
         byte[] key = cipherService.generateMasterKey();
-        byte[] iv1 = cipherService.generateIV();
-        byte[] iv2 = cipherService.generateIV();
+        byte[] correctIV = cipherService.generateIV();
+        byte[] wrongIV = cipherService.generateIV();
 
-        byte[] decryptedData1 = cipherService.decrypt(data, key, iv1);
-        byte[] decryptedData2 = cipherService.decrypt(data, key, iv2);
+        byte[] encryptedData = cipherService.encrypt(originalData, key, correctIV);
 
-        assertNotNull(decryptedData1);
-        assertNotNull(decryptedData2);
-        assertFalse(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con IVs diferentes debería producir outputs diferentes.");
+        assertThrows(DecryptionException.class, () -> {
+            cipherService.decrypt(encryptedData, key, wrongIV);
+        }, "Debería lanzar DecryptionException al intentar descifrar con un IV incorrecto.");
     }
 
     @Test
-    public void testDecrypt_DifferentKey_ReturnsDifferentOutput() {
-        byte[] data = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    public void testDecrypt_TamperedEncryptedData_ThrowsDecryptionException() {
+        byte[] originalData = "Data to be decrypted.".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] key = cipherService.generateMasterKey();
         byte[] iv = cipherService.generateIV();
 
-        byte[] key1 = cipherService.generateMasterKey();
-        byte[] key2 = cipherService.generateMasterKey();
+        byte[] encryptedData = cipherService.encrypt(originalData, key, iv);
 
-        byte[] decryptedData1 = cipherService.decrypt(data, key1, iv);
-        byte[] decryptedData2 = cipherService.decrypt(data, key2, iv);
+        // Tamper with the encrypted data (e.g., change one byte)
+        encryptedData[0] = (byte) (encryptedData[0] ^ 0x01);
 
-        assertNotNull(decryptedData1);
-        assertNotNull(decryptedData2);
-        assertFalse(Arrays.equals(decryptedData1, decryptedData2), "Decifrar con claves diferentes debería producir outputs diferentes.");
+        assertThrows(DecryptionException.class, () -> {
+            cipherService.decrypt(encryptedData, key, iv);
+        }, "Debería lanzar DecryptionException al intentar descifrar datos manipulados.");
     }
 }
-
-
