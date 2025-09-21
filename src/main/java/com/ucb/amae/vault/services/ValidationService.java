@@ -31,4 +31,16 @@ public class ValidationService {
             throw new IllegalArgumentException("El salt debe tener una longitud de " + expectedLength + " bytes.");
         }
     }
+
+    public static void validateDataNotNull(byte[] data) {
+        if (data == null) {
+            throw new IllegalArgumentException("Los datos no pueden ser nulos.");
+        }
+    }
+
+    public static void validateDataNotEmpty(byte[] data) {
+        if (data.length == 0) {
+            throw new IllegalArgumentException("Los datos no pueden estar vacíos.");
+        }
+    }
 }
