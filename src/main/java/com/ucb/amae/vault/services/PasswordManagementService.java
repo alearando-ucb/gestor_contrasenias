@@ -1,9 +1,24 @@
 package com.ucb.amae.vault.services;
 
 import com.ucb.amae.vault.services.models.PasswordStrength;
+
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class PasswordManagementService {
+
+    private static String uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static String lowercase = "abcdefghijklmnopqrstuvwxyz";
+    private static String numbers = "0123456789";
+    private static String symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    private static String allCharacters = uppercase + lowercase + numbers + symbols;
+    
+    private static final SecureRandom random = new SecureRandom();
+    private static int minLength = 12;
+    private static int maxLength = 20;
 
     /**
      * Evalúa la fortaleza de una contraseña basándose en un sistema de puntuación.
@@ -12,7 +27,7 @@ public class PasswordManagementService {
      * @return Un valor de la enumeración PasswordStrength que representa la fortaleza.
      * @throws IllegalArgumentException si la contraseña es nula, vacía o solo contiene espacios en blanco.
      */
-    public PasswordStrength evaluatePasswordStrength(String password) {
+    public static PasswordStrength evaluatePasswordStrength(String password) {
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede ser nula, vacía o contener solo espacios en blanco.");
         }
@@ -27,17 +42,23 @@ public class PasswordManagementService {
         }
 
         // Criterio 2: Variedad de caracteres (se suma 1 por cada tipo presente)
-        if (Pattern.compile("[A-Z]").matcher(password).find()) {
-            score++; // Contiene mayúsculas
+       if (containsAnyChar(password, uppercase)) {
+            score++; // Contains uppercase
         }
-        if (Pattern.compile("[a-z]").matcher(password).find()) {
-            score++; // Contiene minúsculas
+        
+        // Check for lowercase letters
+        if (containsAnyChar(password, lowercase)) {
+            score++; // Contains lowercase
         }
-        if (Pattern.compile("[0-9]").matcher(password).find()) {
-            score++; // Contiene números
+        
+        // Check for numbers
+        if (containsAnyChar(password, numbers)) {
+            score++; // Contains numbers
         }
-        if (Pattern.compile("[^a-zA-Z0-9]").matcher(password).find()) {
-            score++; // Contiene caracteres especiales
+        
+        // Check for symbols
+        if (containsAnyChar(password, symbols)) {
+            score++; // Contains special characters
         }
 
         // Mapeo de puntuación a nivel de fortaleza
@@ -53,4 +74,43 @@ public class PasswordManagementService {
             return PasswordStrength.MUY_FUERTE;
         }
     }
+
+    public static String generateSecurePassword() {
+
+        int length = random.nextInt(maxLength - minLength + 1) + minLength;
+        
+        List<Character> password = new ArrayList<>();
+        
+        // Ensure at least one character of each type
+        password.add(uppercase.charAt(random.nextInt(uppercase.length())));
+        password.add(lowercase.charAt(random.nextInt(lowercase.length())));
+        password.add(numbers.charAt(random.nextInt(numbers.length())));
+        password.add(symbols.charAt(random.nextInt(symbols.length())));
+        
+        // Fill the rest with random characters
+        for (int i = 4; i < length; i++) {
+            password.add(allCharacters.charAt(random.nextInt(allCharacters.length())));
+        }
+        
+        // Shuffle the characters using Collections.shuffle
+        Collections.shuffle(password, random);
+        
+        // Convert List<Character> to String
+        StringBuilder result = new StringBuilder(length);
+        for (Character c : password) {
+            result.append(c);
+        }
+        
+        return result.toString();
+    }
+
+    private static boolean containsAnyChar(String text, String charSet) {
+        for (char c : text.toCharArray()) {
+            if (charSet.indexOf(c) != -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
