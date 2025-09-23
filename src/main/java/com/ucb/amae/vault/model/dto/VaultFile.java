@@ -5,16 +5,16 @@ public class VaultFile implements java.io.Serializable {
     private byte[] salt;
     private byte[] keyIV;
     private byte[] dataIV;
-    private byte[] key;
+    private byte[] encryptedKey;
     private byte[] encryptedData;
 
     public VaultFile() {
     }
-    public VaultFile(byte[] salt, byte[] keyIV, byte[] dataIV, byte[] key, byte[] encryptedData) {
+    public VaultFile(byte[] salt, byte[] keyIV, byte[] dataIV, byte[] encryptedKey, byte[] encryptedData) {
         this.salt = salt;
         this.keyIV = keyIV;
         this.dataIV = dataIV;
-        this.key = key;
+        this.encryptedKey = encryptedKey;
         this.encryptedData = encryptedData;
     }
 
@@ -42,12 +42,12 @@ public class VaultFile implements java.io.Serializable {
         this.dataIV = dataIV;
     }
 
-    public byte[] getKey() {
-        return key;
+    public byte[] getEncryptedKey() {
+        return encryptedKey;
     }
 
-    public void setKey(byte[] key) {
-        this.key = key;
+    public void setEncryptedKey(byte[] encryptedKey) {
+        this.encryptedKey = encryptedKey;
     }
 
     public byte[] getEncryptedData() {
@@ -57,5 +57,5 @@ public class VaultFile implements java.io.Serializable {
     public void setEncryptedData(byte[] encryptedData) {
         this.encryptedData = encryptedData;
     }
-    
+
 }
