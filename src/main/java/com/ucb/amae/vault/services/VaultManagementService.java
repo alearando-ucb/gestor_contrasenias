@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ucb.amae.vault.model.Vault;
 import com.ucb.amae.vault.model.VaultEntry;
 import com.ucb.amae.vault.model.dto.VaultFile;
+import com.ucb.amae.vault.services.models.PasswordStrength;
 
 public class VaultManagementService {
 
@@ -25,6 +26,11 @@ public class VaultManagementService {
     }
 
     public void newVault(String password, Path filePath) {
+
+        if(PasswordManagementService.evaluatePasswordStrength(password) != PasswordStrength.MUY_FUERTE){
+            throw new IllegalArgumentException("La contraseña debil.");
+        }
+
         try{
             /*
             * Generamos los valores iniciales del vault
