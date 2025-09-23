@@ -8,4 +8,5 @@ Este proyecto está siendo desarrollado con las siguientes herramientas:
 
 *   **Java:** Versión 21 (OpenJDK LTS)
 *   **JavaFX:** Versión 21
+*   **Jackson:** Versión 2.19.2
 *   **Maven:** Para la gestión de dependencias y construcción del proyecto.
