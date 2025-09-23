@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.nio.file.Path;
 
-import com.ucb.amae.vault.model.Vault;
 import com.ucb.amae.vault.model.dto.VaultFile;
 
 public class VaultFileIOService {
