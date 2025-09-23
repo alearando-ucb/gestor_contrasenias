@@ -57,5 +57,49 @@ public class VaultManagementService {
 
     }
 
+    public void loadVault(String password, Path filePath) {
+        try {
+            /*
+             * Cargar el archivo del vault desde disco
+             */
+            VaultFile vaultFile = vaultFileIOService.loadVaultFile(filePath);
+            if (vaultFile == null) {
+                // Opcional: manejar el caso de archivo no encontrado
+                return;
+            }
+
+            /*
+             * Derivar la llave de cifrado desde la contraseña y la salt
+             * Descifrar la llave maestra con la llave derivada
+             */
+            byte[] deriveKey = cipherService.deriveKey(password, vaultFile.getSalt());
+            byte[] masterKey = cipherService.decrypt(vaultFile.getEncryptedKey(), deriveKey, vaultFile.getKeyIV());
+            VaultManagementService.masterKey = masterKey;
+
+            /*
+             * Descifrar los datos del vault con la llave maestra
+             * Reconstruir el objeto Vault en memoria
+             */
+            byte[] jsonData = cipherService.decrypt(vaultFile.getEncryptedData(), masterKey, vaultFile.getDataIV());
+            String json = new String(jsonData);
+
+            VaultManagementService.currenVault = new Vault(
+                vaultFile.getSalt(),
+                vaultFile.getKeyIV(),
+                vaultFile.getDataIV(),
+                jsonService.fromJson(json)
+            );
+
+        } catch (JsonProcessingException e) {
+            // Error al procesar el JSON (archivo corrupto)
+            // TODO: Manejar la excepción apropiadamente
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Posible DecryptionException si la contraseña es incorrecta o archivo corrupto
+            // TODO: Manejar la excepción apropiadamente
+            e.printStackTrace();
+        }
+    }
+
 
 }
