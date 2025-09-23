@@ -4,12 +4,14 @@ import java.nio.file.Path;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ucb.amae.vault.model.Vault;
+import com.ucb.amae.vault.model.VaultEntry;
 import com.ucb.amae.vault.model.dto.VaultFile;
 
 public class VaultManagementService {
 
     private static Vault currenVault;
     private static byte[] masterKey;
+    private static byte[] encryptedMasterKey;
 
 
     private VaultFileIOService vaultFileIOService;
@@ -43,6 +45,7 @@ public class VaultManagementService {
             * Guardamos el vault en disco
             */
             byte[] encryptedKey = cipherService.encrypt(masterKey, deriveKey, keyIV);
+            VaultManagementService.encryptedMasterKey = encryptedKey;
             VaultFile vaultFile = new VaultFile(salt, keyIV, dataIV, encryptedKey, new byte[0]);
 
             String data = jsonService.toJson(VaultManagementService.currenVault.getEntries());
@@ -75,6 +78,7 @@ public class VaultManagementService {
             byte[] deriveKey = cipherService.deriveKey(password, vaultFile.getSalt());
             byte[] masterKey = cipherService.decrypt(vaultFile.getEncryptedKey(), deriveKey, vaultFile.getKeyIV());
             VaultManagementService.masterKey = masterKey;
+            VaultManagementService.encryptedMasterKey = vaultFile.getEncryptedKey();
 
             /*
              * Descifrar los datos del vault con la llave maestra
@@ -99,6 +103,52 @@ public class VaultManagementService {
             // TODO: Manejar la excepción apropiadamente
             e.printStackTrace();
         }
+    }
+
+    public void addEntryAndSave(VaultEntry entry, Path filePath) {
+        try {
+            if (currenVault == null || masterKey == null || encryptedMasterKey == null) {
+                throw new IllegalStateException("No vault is currently loaded or created.");
+            }
+    
+            /*
+            * Agregamos la entrada al vault en memoria
+            */
+            currenVault.addEntry(entry);
+    
+            /*
+            * Serializamos las entradas actualizadas a JSON
+            */
+            String data = jsonService.toJson(currenVault.getEntries());
+    
+            /*
+            * Encriptamos los datos JSON con la llave maestra en memoria
+            */
+            byte[] encryptedData = cipherService.encrypt(data.getBytes(), masterKey, currenVault.getDataIV());
+    
+            /*
+            * Creamos un DTO VaultFile con los nuevos datos encriptados
+            */
+            VaultFile vaultFile = new VaultFile(
+                currenVault.getSalt(),
+                currenVault.getKeyIV(),
+                currenVault.getDataIV(),
+                encryptedMasterKey,
+                encryptedData
+            );
+    
+            /*
+            * Escribimos el archivo en el disco
+            */
+            vaultFileIOService.writeVaultFile(filePath, vaultFile);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public static Vault getCurrentVault() {
+        return currenVault;
     }
 
 
