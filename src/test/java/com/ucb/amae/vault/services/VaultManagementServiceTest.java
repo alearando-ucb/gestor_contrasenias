@@ -25,7 +25,7 @@ class VaultManagementServiceTest {
     void testFullVaultCycle_NewAddSaveLoad(@TempDir Path tempDir) throws IOException {
         // Arrange
         Path vaultPath = tempDir.resolve("mytest.vault");
-        String password = "super-secret-password";
+        String password = "Super-Secret-Password1";
         VaultEntry newEntry = new VaultEntry("Gmail", "test@gmail.com", "password123", "https://mail.google.com");
 
         // --- 1. Create a new, empty vault ---
