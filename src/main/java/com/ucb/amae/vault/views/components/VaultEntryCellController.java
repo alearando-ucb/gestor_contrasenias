@@ -53,6 +53,14 @@ public class VaultEntryCellController {
         copyPasswordButton.setOnAction(event -> copyToClipboardWithTimeout(copyPasswordButton, vaultEntry.getPassword()));
         togglePasswordVisibilityButton.setOnAction(event -> togglePasswordVisibility());
         deleteEntryButton.setOnAction(event -> handleDeleteEntry());
+        editEntryButton.setOnAction(event -> handleEditEntry());
+    }
+
+    private void handleEditEntry() {
+        if (vaultEntry == null || mainVaultController == null) {
+            return;
+        }
+        mainVaultController.showEditDialog(vaultEntry);
     }
 
     public void setMainController(MainVaultController mainVaultController) {

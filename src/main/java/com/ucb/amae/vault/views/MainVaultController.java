@@ -125,6 +125,7 @@ public class MainVaultController {
 
             if (dialogController.isConfirmed()) {
                 VaultEntry newEntry = dialogController.getVaultEntry();
+                vaultManagementService.addEntryAndSave(newEntry);
                 observableVaultEntries.add(newEntry);
                 showStatusMessage("Nueva entrada añadida: " + newEntry.getServiceName(), false);
             } else {
@@ -133,6 +134,44 @@ public class MainVaultController {
 
         } catch (IOException e) {
             showStatusMessage("Error al abrir el diálogo de nueva entrada: " + e.getMessage(), true);
+            e.printStackTrace();
+        }
+    }
+
+    public void showEditDialog(VaultEntry entryToEdit) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ucb/amae/vault/new_entry_dialog.fxml"));
+            Parent root = loader.load();
+
+            NewEntryDialogController dialogController = loader.getController();
+            dialogController.setEntryToEdit(entryToEdit);
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Editar Entrada de Bóveda");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(addEntryButton.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+
+            dialogController.setDialogStage(dialogStage);
+
+            dialogStage.showAndWait();
+
+            if (dialogController.isConfirmed()) {
+                VaultEntry updatedEntry = dialogController.getVaultEntry();
+                vaultManagementService.updateEntryAndSave(entryToEdit, updatedEntry);
+
+                int index = observableVaultEntries.indexOf(entryToEdit);
+                if (index != -1) {
+                    observableVaultEntries.set(index, updatedEntry);
+                }
+
+                showStatusMessage("Entrada '" + updatedEntry.getServiceName() + "' actualizada.", false);
+            } else {
+                showStatusMessage("Edición cancelada.", false);
+            }
+
+        } catch (IOException e) {
+            showStatusMessage("Error al abrir el diálogo de edición: " + e.getMessage(), true);
             e.printStackTrace();
         }
     }

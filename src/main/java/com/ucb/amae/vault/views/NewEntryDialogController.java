@@ -17,7 +17,7 @@ public class NewEntryDialogController {
     @FXML
     private TextField usernameField;
     @FXML
-    private TextField passwordField; // Changed from PasswordField to TextField
+    private TextField passwordField;
     @FXML
     private Button generatePasswordButton;
     @FXML
@@ -30,24 +30,21 @@ public class NewEntryDialogController {
     private Button cancelButton;
 
     private Stage dialogStage;
-    private VaultEntry vaultEntry;
+    private VaultEntry resultEntry;
     private boolean confirmed = false;
-    private VaultManagementService vaultManagementService;
 
     @FXML
     private void initialize() {
         generatePasswordButton.setOnAction(event -> handleGeneratePassword());
         saveButton.setOnAction(event -> handleSave());
         cancelButton.setOnAction(event -> handleCancel());
-        this.vaultManagementService = new VaultManagementService();
     }
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
 
-    public void setVaultEntry(VaultEntry entry) {
-        this.vaultEntry = entry;
+    public void setEntryToEdit(VaultEntry entry) {
         serviceNameField.setText(entry.getServiceName());
         usernameField.setText(entry.getUsername());
         passwordField.setText(entry.getPassword());
@@ -59,7 +56,7 @@ public class NewEntryDialogController {
     }
 
     public VaultEntry getVaultEntry() {
-        return vaultEntry;
+        return resultEntry;
     }
 
     @FXML
@@ -80,16 +77,9 @@ public class NewEntryDialogController {
             return;
         }
 
-        this.vaultEntry = new VaultEntry(serviceName, username, password, url);
-        
-        try {
-            vaultManagementService.addEntryAndSave(this.vaultEntry);
-            confirmed = true;
-            dialogStage.close();
-        } catch (Exception e) {
-            statusLabel.setText("Error al guardar la entrada: " + e.getMessage());
-            e.printStackTrace();
-        }
+        this.resultEntry = new VaultEntry(serviceName, username, password, url);
+        confirmed = true;
+        dialogStage.close();
     }
 
     @FXML
