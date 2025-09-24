@@ -34,6 +34,7 @@ public class MainVaultController {
     private ListView<VaultEntry> vaultEntriesListView;
 
     private ObservableList<VaultEntry> observableVaultEntries;
+    private VaultManagementService vaultManagementService;
 
     @FXML
     public void initialize() {
@@ -59,6 +60,7 @@ public class MainVaultController {
                             loader = new FXMLLoader(getClass().getResource("/com/ucb/amae/vault/vault_entry_cell.fxml"));
                             cellRoot = loader.load();
                             controller = loader.getController();
+                            controller.setMainController(MainVaultController.this);
                             controller.setVaultEntry(entry);
                             setGraphic(cellRoot);
                         } catch (IOException e) {
@@ -74,8 +76,23 @@ public class MainVaultController {
             vaultNameLabel.setText("Bóveda: [No cargada]"); // Fallback
         }
 
+        this.vaultManagementService = new VaultManagementService();
         logoutButton.setOnAction(event -> handleLogout());
         addEntryButton.setOnAction(event -> handleAddEntry());
+    }
+
+    public void deleteEntry(VaultEntry entry) {
+        if (entry == null) {
+            return;
+        }
+        try {
+            vaultManagementService.deleteEntryAndSave(entry);
+            observableVaultEntries.remove(entry);
+            showStatusMessage("Entrada '" + entry.getServiceName() + "' eliminada.", false);
+        } catch (Exception e) {
+            showStatusMessage("Error al eliminar la entrada: " + e.getMessage(), true);
+            e.printStackTrace();
+        }
     }
 
     @FXML

@@ -10,8 +10,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.ClipboardContent;
 import javafx.util.Duration;
+import com.ucb.amae.vault.views.MainVaultController;
+import java.util.Optional;
 
 public class VaultEntryCellController {
 
@@ -38,6 +42,7 @@ public class VaultEntryCellController {
 
     private VaultEntry vaultEntry;
     private boolean passwordVisible = false;
+    private MainVaultController mainVaultController;
 
     private final Image eyeOpenIcon = new Image(getClass().getResourceAsStream("/com/ucb/amae/vault/icons/eye_open.png"));
     private final Image eyeClosedIcon = new Image(getClass().getResourceAsStream("/com/ucb/amae/vault/icons/eye_closed.png"));
@@ -47,6 +52,27 @@ public class VaultEntryCellController {
         copyUsernameButton.setOnAction(event -> copyToClipboardWithTimeout(copyUsernameButton, vaultEntry.getUsername()));
         copyPasswordButton.setOnAction(event -> copyToClipboardWithTimeout(copyPasswordButton, vaultEntry.getPassword()));
         togglePasswordVisibilityButton.setOnAction(event -> togglePasswordVisibility());
+        deleteEntryButton.setOnAction(event -> handleDeleteEntry());
+    }
+
+    public void setMainController(MainVaultController mainVaultController) {
+        this.mainVaultController = mainVaultController;
+    }
+
+    private void handleDeleteEntry() {
+        if (vaultEntry == null || mainVaultController == null) {
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmar Eliminación");
+        alert.setHeaderText("Eliminar Entrada: " + vaultEntry.getServiceName());
+        alert.setContentText("¿Estás seguro de que deseas eliminar esta entrada? Esta acción no se puede deshacer.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            mainVaultController.deleteEntry(vaultEntry);
+        }
     }
 
     public void setVaultEntry(VaultEntry entry) {
