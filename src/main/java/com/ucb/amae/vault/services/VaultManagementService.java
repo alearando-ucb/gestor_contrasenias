@@ -125,24 +125,12 @@ public class VaultManagementService {
                 throw new IllegalStateException("No vault is currently loaded or created.");
             }
     
-            /*
-            * Agregamos la entrada al vault en memoria
-            */
             currenVault.addEntry(entry);
     
-            /*
-            * Serializamos las entradas actualizadas a JSON
-            */
             String data = jsonService.toJson(currenVault.getEntries());
     
-            /*
-            * Encriptamos los datos JSON con la llave maestra en memoria
-            */
             byte[] encryptedData = cipherService.encrypt(data.getBytes(), masterKey, currenVault.getDataIV());
     
-            /*
-            * Creamos un DTO VaultFile con los nuevos datos encriptados
-            */
             VaultFile vaultFile = new VaultFile(
                 currenVault.getSalt(),
                 currenVault.getKeyIV(),
@@ -151,12 +139,70 @@ public class VaultManagementService {
                 encryptedData
             );
     
-            /*
-            * Escribimos el archivo en el disco
-            */
             vaultFileIOService.writeVaultFile(currentVaultPath, vaultFile);
         } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void updateEntryAndSave(VaultEntry oldEntry, VaultEntry newEntry) {
+        try {
+            if (currenVault == null || masterKey == null || encryptedMasterKey == null) {
+                throw new IllegalStateException("No vault is currently loaded or created.");
+            }
+
+            int entryIndex = currenVault.getEntries().indexOf(oldEntry);
+
+            if (entryIndex == -1) {
+                throw new IllegalStateException("The entry to be updated was not found in the current vault.");
+            }
+
+            currenVault.getEntries().set(entryIndex, newEntry);
+
+            String data = jsonService.toJson(currenVault.getEntries());
+
+            byte[] encryptedData = cipherService.encrypt(data.getBytes(), masterKey, currenVault.getDataIV());
+
+            VaultFile vaultFile = new VaultFile(
+                currenVault.getSalt(),
+                currenVault.getKeyIV(),
+                currenVault.getDataIV(),
+                encryptedMasterKey,
+                encryptedData
+            );
+
+            vaultFileIOService.writeVaultFile(currentVaultPath, vaultFile);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteEntryAndSave(VaultEntry entryToRemove) {
+        try {
+            if (currenVault == null || masterKey == null || encryptedMasterKey == null) {
+                throw new IllegalStateException("No vault is currently loaded or created.");
+            }
+
+            boolean removed = currenVault.getEntries().remove(entryToRemove);
+
+            if (!removed) {
+                throw new IllegalStateException("The entry to be deleted was not found in the current vault.");
+            }
+
+            String data = jsonService.toJson(currenVault.getEntries());
+
+            byte[] encryptedData = cipherService.encrypt(data.getBytes(), masterKey, currenVault.getDataIV());
+
+            VaultFile vaultFile = new VaultFile(
+                currenVault.getSalt(),
+                currenVault.getKeyIV(),
+                currenVault.getDataIV(),
+                encryptedMasterKey,
+                encryptedData
+            );
+
+            vaultFileIOService.writeVaultFile(currentVaultPath, vaultFile);
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
