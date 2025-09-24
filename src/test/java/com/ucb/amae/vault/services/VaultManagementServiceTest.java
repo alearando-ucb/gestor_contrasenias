@@ -40,7 +40,7 @@ class VaultManagementServiceTest {
         byte[] originalDataIV = Arrays.copyOf(initialVault.getDataIV(), initialVault.getDataIV().length);
 
         // --- 2. Add an entry and save the vault ---
-        vaultManagementService.addEntryAndSave(newEntry, vaultPath);
+        vaultManagementService.addEntryAndSave(newEntry);
 
         // --- 3. Load the vault from disk ---
         vaultManagementService.loadVault(password, vaultPath);

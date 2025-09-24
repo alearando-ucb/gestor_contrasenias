@@ -15,6 +15,7 @@ public class VaultManagementService {
     private static byte[] masterKey;
     private static byte[] encryptedMasterKey;
     private static String currentVaultFileName;
+    private static Path currentVaultPath;
 
     private VaultFileIOService vaultFileIOService;
     private CipherService cipherService;
@@ -60,6 +61,7 @@ public class VaultManagementService {
             vaultFile.setEncryptedData(encryptedData);
             vaultFileIOService.writeVaultFile(filePath, vaultFile);
             VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
+            VaultManagementService.currentVaultPath = filePath;
 
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
@@ -102,6 +104,7 @@ public class VaultManagementService {
                 jsonService.fromJson(json)
             );
             VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
+            VaultManagementService.currentVaultPath = filePath;
 
         } catch (JsonProcessingException e) {
             // Error al procesar el JSON (archivo corrupto)
@@ -116,7 +119,7 @@ public class VaultManagementService {
         }
     }
 
-    public void addEntryAndSave(VaultEntry entry, Path filePath) {
+    public void addEntryAndSave(VaultEntry entry) {
         try {
             if (currenVault == null || masterKey == null || encryptedMasterKey == null) {
                 throw new IllegalStateException("No vault is currently loaded or created.");
@@ -151,7 +154,7 @@ public class VaultManagementService {
             /*
             * Escribimos el archivo en el disco
             */
-            vaultFileIOService.writeVaultFile(filePath, vaultFile);
+            vaultFileIOService.writeVaultFile(currentVaultPath, vaultFile);
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -164,6 +167,10 @@ public class VaultManagementService {
 
     public static String getCurrentVaultFileName() {
         return currentVaultFileName;
+    }
+
+    public static Path getCurrentVaultPath() {
+        return currentVaultPath;
     }
 
 

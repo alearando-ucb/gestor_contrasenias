@@ -26,8 +26,6 @@ public class NewVaultPasswordDialogController {
     private String masterPassword;
     private boolean confirmed = false;
 
-    private PasswordManagementService passwordManagementService = new PasswordManagementService(); // Instantiate service
-
     public void setVaultPath(String path) {
         vaultPathLabel.setText(path);
     }
@@ -55,7 +53,7 @@ public class NewVaultPasswordDialogController {
         }
 
         // Validate password strength
-        if (passwordManagementService.evaluatePasswordStrength(password) != PasswordStrength.MUY_FUERTE) {
+        if (PasswordManagementService.evaluatePasswordStrength(password) != PasswordStrength.MUY_FUERTE) {
             statusLabel.setText("La contraseña debe ser MUY FUERTE. Incluye mayúsculas, minúsculas, números y símbolos, y al menos 12 caracteres.");
             return;
         }
