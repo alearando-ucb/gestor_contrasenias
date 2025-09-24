@@ -89,6 +89,10 @@ public class EntryVaultController {
         } catch (Exception e) {
             statusLabel.setText("Error al abrir la bóveda: Contraseña incorrecta o archivo corrupto.");
             e.printStackTrace();
+        }finally{
+            masterPasswordField.clear();
+            updateOpenVaultButtonState();
+            masterPasswordField.requestFocus();
         }
     }
 
