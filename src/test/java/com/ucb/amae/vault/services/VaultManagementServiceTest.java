@@ -58,4 +58,48 @@ class VaultManagementServiceTest {
         assertEquals(1, loadedVault.getEntries().size(), "Loaded vault should contain one entry.");
         assertEquals(newEntry, loadedVault.getEntries().get(0), "The loaded entry should match the one that was saved.");
     }
+
+    @Test
+    void testUpdateEntry_Success(@TempDir Path tempDir) throws IOException {
+        Path vaultPath = tempDir.resolve("mytest.vault");
+        String password = "Super-Secret-Password1";
+        VaultEntry entryToKeep = new VaultEntry("Facebook", "user@fb.com", "fb-pass", "fb.com");
+        VaultEntry entryToUpdate = new VaultEntry("Gmail", "test@gmail.com", "password123", "gmail.com");
+
+        vaultManagementService.newVault(password, vaultPath);
+        vaultManagementService.addEntryAndSave(entryToKeep);
+        vaultManagementService.addEntryAndSave(entryToUpdate);
+
+        VaultEntry updatedEntry = new VaultEntry("Gmail", "test-updated@gmail.com", "new-password456", "mail.google.com");
+        vaultManagementService.updateEntryAndSave(entryToUpdate, updatedEntry);
+
+        vaultManagementService.loadVault(password, vaultPath);
+        Vault loadedVault = VaultManagementService.getCurrentVault();
+
+        assertEquals(2, loadedVault.getEntries().size(), "Vault should still contain two entries.");
+        assertTrue(loadedVault.getEntries().contains(updatedEntry), "Vault should contain the updated entry.");
+        assertTrue(loadedVault.getEntries().contains(entryToKeep), "Vault should still contain the unmodified entry.");
+        assertFalse(loadedVault.getEntries().contains(entryToUpdate), "Vault should not contain the original entry anymore.");
+    }
+
+    @Test
+    void testDeleteEntry_Success(@TempDir Path tempDir) throws IOException {
+        Path vaultPath = tempDir.resolve("mytest.vault");
+        String password = "Super-Secret-Password1";
+        VaultEntry entryToKeep = new VaultEntry("Facebook", "user@fb.com", "fb-pass", "fb.com");
+        VaultEntry entryToDelete = new VaultEntry("Gmail", "test@gmail.com", "password123", "gmail.com");
+
+        vaultManagementService.newVault(password, vaultPath);
+        vaultManagementService.addEntryAndSave(entryToKeep);
+        vaultManagementService.addEntryAndSave(entryToDelete);
+
+        vaultManagementService.deleteEntryAndSave(entryToDelete);
+
+        vaultManagementService.loadVault(password, vaultPath);
+        Vault loadedVault = VaultManagementService.getCurrentVault();
+
+        assertEquals(1, loadedVault.getEntries().size(), "Vault should contain only one entry after deletion.");
+        assertTrue(loadedVault.getEntries().contains(entryToKeep), "Vault should still contain the unmodified entry.");
+        assertFalse(loadedVault.getEntries().contains(entryToDelete), "Vault should not contain the deleted entry.");
+    }
 }
