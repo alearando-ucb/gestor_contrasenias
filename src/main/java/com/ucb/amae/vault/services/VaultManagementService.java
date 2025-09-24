@@ -14,7 +14,7 @@ public class VaultManagementService {
     private static Vault currenVault;
     private static byte[] masterKey;
     private static byte[] encryptedMasterKey;
-
+    private static String currentVaultFileName;
 
     private VaultFileIOService vaultFileIOService;
     private CipherService cipherService;
@@ -59,6 +59,7 @@ public class VaultManagementService {
             byte[] encryptedData = cipherService.encrypt(data.getBytes(), masterKey, dataIV);
             vaultFile.setEncryptedData(encryptedData);
             vaultFileIOService.writeVaultFile(filePath, vaultFile);
+            VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
 
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
@@ -100,6 +101,7 @@ public class VaultManagementService {
                 vaultFile.getDataIV(),
                 jsonService.fromJson(json)
             );
+            VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
 
         } catch (JsonProcessingException e) {
             // Error al procesar el JSON (archivo corrupto)
@@ -158,6 +160,10 @@ public class VaultManagementService {
 
     public static Vault getCurrentVault() {
         return currenVault;
+    }
+
+    public static String getCurrentVaultFileName() {
+        return currentVaultFileName;
     }
 
 

@@ -1,13 +1,21 @@
 package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.App;
-import java.io.IOException;
+import com.ucb.amae.vault.services.VaultManagementService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 
 public class MainVaultController {
 
     @FXML
-    private void switchToEntryVault() throws IOException {
-        App.setRoot("entry_vault");
+    private Label vaultNameLabel;
+
+    @FXML
+    public void initialize() {
+        if (VaultManagementService.getCurrentVaultFileName() != null) {
+            vaultNameLabel.setText("Bóveda: " + VaultManagementService.getCurrentVaultFileName());
+        } else {
+            vaultNameLabel.setText("Bóveda: [No cargada]"); // Fallback
+        }
     }
 }
