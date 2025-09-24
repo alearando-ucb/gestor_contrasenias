@@ -36,7 +36,7 @@
 
         <VBox alignment="CENTER" spacing="10">
             <Label text="¿No tienes una bóveda?" />
-            <Button fx:id="createNewVaultButton" text="Crear Nueva Bóveda" />
+            <Button fx:id="createNewVaultButton" text="Crear Nueva Bóveda" onAction="#handleCreateNewVault" />
         </VBox>
 
         <Label fx:id="statusLabel" style="-fx-text-fill: red;" text="" />
