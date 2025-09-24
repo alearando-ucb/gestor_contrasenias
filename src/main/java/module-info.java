@@ -5,6 +5,7 @@ module com.ucb.amae.vault {
 
     opens com.ucb.amae.vault to javafx.fxml;
     opens com.ucb.amae.vault.views to javafx.fxml;
+    opens com.ucb.amae.vault.views.components to javafx.fxml;
     opens com.ucb.amae.vault.model to com.fasterxml.jackson.databind;
     exports com.ucb.amae.vault;
 }
