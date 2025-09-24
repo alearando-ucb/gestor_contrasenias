@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ucb.amae.vault.model.Vault;
 import com.ucb.amae.vault.model.VaultEntry;
 import com.ucb.amae.vault.model.dto.VaultFile;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 import com.ucb.amae.vault.services.models.PasswordStrength;
 
 public class VaultManagementService {
@@ -104,6 +105,8 @@ public class VaultManagementService {
             // Error al procesar el JSON (archivo corrupto)
             // TODO: Manejar la excepción apropiadamente
             e.printStackTrace();
+        } catch (DecryptionException e) {
+            throw e;
         } catch (Exception e) {
             // Posible DecryptionException si la contraseña es incorrecta o archivo corrupto
             // TODO: Manejar la excepción apropiadamente

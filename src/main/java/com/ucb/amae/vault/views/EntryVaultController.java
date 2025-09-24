@@ -2,6 +2,8 @@ package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.App;
 import com.ucb.amae.vault.services.VaultManagementService;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -44,8 +46,50 @@ public class EntryVaultController {
     }
 
     private void updateOpenVaultButtonState() {
-        boolean isPasswordEmpty = masterPasswordField.getText().trim().isEmpty();
-        openVaultButton.setDisable(currentVaultFile == null || isPasswordEmpty);
+        boolean isPasswordTooShort = masterPasswordField.getText().trim().length() < 8; // Check for length >= 8
+        openVaultButton.setDisable(currentVaultFile == null || isPasswordTooShort);
+    }
+
+    @FXML
+    private void handleChangeVault() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleccionar Archivo de Bóveda");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Bóveda", "*.vault"));
+        File selectedFile = fileChooser.showOpenDialog(new Stage());
+
+        if (selectedFile != null) {
+            currentVaultFile = selectedFile;
+            lastVaultNameLabel.setText(selectedFile.getName());
+            masterPasswordField.clear(); // Clear password field when changing vault
+            statusLabel.setText(""); // Clear any previous status message
+            updateOpenVaultButtonState();
+            masterPasswordField.requestFocus(); // Set focus to the password field
+        }
+    }
+
+    @FXML
+    private void handleOpenVault() throws IOException {
+        String masterPassword = masterPasswordField.getText();
+        if (currentVaultFile == null) {
+            statusLabel.setText("Por favor, selecciona un archivo de bóveda.");
+            return;
+        }
+        if (masterPassword.isEmpty()) {
+            statusLabel.setText("Por favor, introduce la contraseña maestra.");
+            return;
+        }
+
+        try {
+            vaultManagementService.loadVault(masterPassword, currentVaultFile.toPath());
+            statusLabel.setText("Bóveda '" + currentVaultFile.getName() + "' abierta con éxito.");
+            App.setRoot("main_vault"); // Transition to main vault view
+        } catch (DecryptionException e) {
+            statusLabel.setText("Error al abrir la bóveda: Contraseña incorrecta o archivo corrupto.");
+            e.printStackTrace();
+        } catch (Exception e) {
+            statusLabel.setText("Error al abrir la bóveda: Contraseña incorrecta o archivo corrupto.");
+            e.printStackTrace();
+        }
     }
 
     @FXML

@@ -22,13 +22,13 @@
             </padding>
             <Label text="Última bóveda abierta:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
             <Label fx:id="lastVaultNameLabel" text="[Ninguna bóveda seleccionada]" GridPane.rowIndex="0" GridPane.columnIndex="1" />
-            <Button fx:id="changeVaultButton" text="Cambiar Bóveda" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+            <Button fx:id="changeVaultButton" text="Cambiar Bóveda" onAction="#handleChangeVault" GridPane.rowIndex="0" GridPane.columnIndex="2" />
 
             <Label text="Contraseña Maestra:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
             <PasswordField fx:id="masterPasswordField" promptText="Introduce tu contraseña maestra" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="2" />
 
             <HBox alignment="CENTER" spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="3">
-                <Button fx:id="openVaultButton" text="Abrir Bóveda" disable="true" />
+                <Button fx:id="openVaultButton" text="Abrir Bóveda" onAction="#handleOpenVault" disable="true" />
             </HBox>
         </GridPane>
 
