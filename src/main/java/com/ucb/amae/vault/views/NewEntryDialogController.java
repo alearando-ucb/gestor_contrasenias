@@ -1,10 +1,10 @@
 package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.model.VaultEntry;
+import com.ucb.amae.vault.services.PasswordManagementService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -15,7 +15,7 @@ public class NewEntryDialogController {
     @FXML
     private TextField usernameField;
     @FXML
-    private PasswordField passwordField;
+    private TextField passwordField; // Changed from PasswordField to TextField
     @FXML
     private Button generatePasswordButton;
     @FXML
@@ -30,6 +30,13 @@ public class NewEntryDialogController {
     private Stage dialogStage;
     private VaultEntry vaultEntry;
     private boolean confirmed = false;
+
+    @FXML
+    private void initialize() {
+        generatePasswordButton.setOnAction(event -> handleGeneratePassword());
+        saveButton.setOnAction(event -> handleSave());
+        cancelButton.setOnAction(event -> handleCancel());
+    }
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -51,7 +58,6 @@ public class NewEntryDialogController {
         return vaultEntry;
     }
 
-    // Placeholder methods for button actions
     @FXML
     private void handleSave() {
         // TODO: Implement validation and save logic
@@ -73,7 +79,8 @@ public class NewEntryDialogController {
 
     @FXML
     private void handleGeneratePassword() {
-        // TODO: Implement password generation
-        statusLabel.setText("Generar contraseña (TODO)");
+        String generatedPassword = PasswordManagementService.generateSecurePassword();
+        passwordField.setText(generatedPassword);
+        statusLabel.setText(""); // Clear any previous status message
     }
 }
