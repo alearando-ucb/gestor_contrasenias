@@ -1,6 +1,5 @@
 package com.ucb.amae.vault.views;
 
-import com.ucb.amae.vault.App;
 import com.ucb.amae.vault.services.VaultManagementService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
