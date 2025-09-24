@@ -1,6 +1,7 @@
 package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.App;
+import com.ucb.amae.vault.services.VaultFileIOService;
 import com.ucb.amae.vault.services.VaultManagementService;
 import com.ucb.amae.vault.services.exceptions.DecryptionException;
 
@@ -54,12 +55,16 @@ public class EntryVaultController {
     private void handleChangeVault() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar Archivo de Bóveda");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Bóveda", "*.vault"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Bóveda", "*" + VaultFileIOService.VAULT_FILE_EXTENSION));
         File selectedFile = fileChooser.showOpenDialog(new Stage());
 
         if (selectedFile != null) {
             currentVaultFile = selectedFile;
-            lastVaultNameLabel.setText(selectedFile.getName());
+            String fileName = selectedFile.getName();
+            if (!fileName.endsWith(VaultFileIOService.VAULT_FILE_EXTENSION)) {
+                fileName += VaultFileIOService.VAULT_FILE_EXTENSION;
+            }
+            lastVaultNameLabel.setText(fileName);
             masterPasswordField.clear(); // Clear password field when changing vault
             statusLabel.setText(""); // Clear any previous status message
             updateOpenVaultButtonState();
@@ -100,7 +105,7 @@ public class EntryVaultController {
     private void handleCreateNewVault() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Guardar Nueva Bóveda");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Bóveda", "*.vault"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos de Bóveda", "*" + VaultFileIOService.VAULT_FILE_EXTENSION));
         File newVaultFile = fileChooser.showSaveDialog(new Stage());
 
         if (newVaultFile != null) {
@@ -124,7 +129,11 @@ public class EntryVaultController {
                     try {
                         vaultManagementService.newVault(masterPassword, newVaultFile.toPath());
                         currentVaultFile = newVaultFile;
-                        lastVaultNameLabel.setText(newVaultFile.getName());
+                        String fileName = newVaultFile.getName();
+                        if (!fileName.endsWith(VaultFileIOService.VAULT_FILE_EXTENSION)) {
+                            fileName += VaultFileIOService.VAULT_FILE_EXTENSION;
+                        }
+                        lastVaultNameLabel.setText(fileName);
                         masterPasswordField.clear();
                         updateOpenVaultButtonState();
                         statusLabel.setText("Bóveda '" + newVaultFile.getName() + "' creada con éxito.");
