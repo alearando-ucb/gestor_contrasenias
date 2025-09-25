@@ -9,6 +9,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -101,5 +102,45 @@ class VaultManagementServiceTest {
         assertEquals(1, loadedVault.getEntries().size(), "Vault should contain only one entry after deletion.");
         assertTrue(loadedVault.getEntries().contains(entryToKeep), "Vault should still contain the unmodified entry.");
         assertFalse(loadedVault.getEntries().contains(entryToDelete), "Vault should not contain the deleted entry.");
+    }
+
+    @Test
+    void changeMasterPassword_validPasswords_vaultLoadableWithNewPassword(@TempDir Path tempDir) throws IOException {
+        // Arrange
+        Path vaultPath = tempDir.resolve("test_change_password.vault");
+        String oldPassword = "Super-Secret-Password1";
+        String newPassword = "Even-Stronger-Password2";
+        VaultEntry testEntry = new VaultEntry("Test", "user@test.com", "testpass", "test.com");
+
+        vaultManagementService.newVault(oldPassword, vaultPath);
+        vaultManagementService.addEntryAndSave(testEntry);
+
+        // Act
+        assertDoesNotThrow(() -> vaultManagementService.changeMasterPassword(oldPassword, newPassword));
+
+        // Assert
+        // Should be able to load with new password
+        assertDoesNotThrow(() -> vaultManagementService.loadVault(newPassword, vaultPath));
+        Vault loadedVault = VaultManagementService.getCurrentVault();
+        assertNotNull(loadedVault);
+        assertEquals(1, loadedVault.getEntries().size());
+        assertEquals(testEntry, loadedVault.getEntries().get(0));
+
+        // Should NOT be able to load with old password
+        assertThrows(DecryptionException.class, () -> vaultManagementService.loadVault(oldPassword, vaultPath));
+    }
+
+    @Test
+    void changeMasterPassword_incorrectOldPassword_throwsDecryptionException(@TempDir Path tempDir) throws IOException {
+        // Arrange
+        Path vaultPath = tempDir.resolve("test_incorrect_old_password.vault");
+        String correctOldPassword = "Super-Secret-Password1";
+        String incorrectOldPassword = "Wrong-Password";
+        String newPassword = "Even-Stronger-Password2";
+
+        vaultManagementService.newVault(correctOldPassword, vaultPath);
+
+        // Act & Assert
+        assertThrows(DecryptionException.class, () -> vaultManagementService.changeMasterPassword(incorrectOldPassword, newPassword));
     }
 }
