@@ -26,6 +26,7 @@
             </Label>
             <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                <children>
+                  <Button fx:id="changePasswordButton" mnemonicParsing="false" text="Cambiar Contraseña Maestra" />
                   <Button fx:id="logoutButton" mnemonicParsing="false" text="Cerrar Bóveda">
                      <HBox.margin>
                         <Insets left="10.0" />

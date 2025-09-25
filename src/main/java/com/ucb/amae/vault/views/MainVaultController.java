@@ -33,6 +33,8 @@ public class MainVaultController {
     @FXML
     private Button logoutButton;
     @FXML
+    private Button changePasswordButton;
+    @FXML
     private ListView<VaultEntry> vaultEntriesListView;
     @FXML
     private TextField searchField;
@@ -105,6 +107,7 @@ public class MainVaultController {
         this.vaultManagementService = new VaultManagementService();
         logoutButton.setOnAction(event -> handleLogout());
         addEntryButton.setOnAction(event -> handleAddEntry());
+        changePasswordButton.setOnAction(event -> handleChangePassword());
     }
 
     public void deleteEntry(VaultEntry entry) {
@@ -117,6 +120,35 @@ public class MainVaultController {
             showStatusMessage("Entrada '" + entry.getServiceName() + "' eliminada.", false);
         } catch (Exception e) {
             showStatusMessage("Error al eliminar la entrada: " + e.getMessage(), true);
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleChangePassword() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ucb/amae/vault/change_password_dialog.fxml"));
+            Parent root = loader.load();
+
+            ChangePasswordDialogController dialogController = loader.getController();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Cambiar Contraseña Maestra");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(changePasswordButton.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+
+            dialogController.setDialogStage(dialogStage);
+
+            dialogStage.showAndWait();
+
+            if (dialogController.isConfirmed()) {
+                // TODO: Implement password change logic here in the next step
+                showStatusMessage("Lógica de cambio de contraseña pendiente.", false);
+            }
+
+        } catch (IOException e) {
+            showStatusMessage("Error al abrir el diálogo: " + e.getMessage(), true);
             e.printStackTrace();
         }
     }
