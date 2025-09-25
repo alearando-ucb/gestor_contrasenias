@@ -6,7 +6,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ucb.amae.vault.model.Vault;
 import com.ucb.amae.vault.model.VaultEntry;
 import com.ucb.amae.vault.model.dto.VaultFile;
+import com.ucb.amae.vault.services.exceptions.CipherException;
 import com.ucb.amae.vault.services.exceptions.DecryptionException;
+import com.ucb.amae.vault.services.exceptions.EncryptionException;
 import com.ucb.amae.vault.services.models.PasswordStrength;
 
 import java.io.IOException;
@@ -232,6 +234,47 @@ public class VaultManagementService {
 
     public static Path getCurrentVaultPath() {
         return currentVaultPath;
+    }
+
+    public void changeMasterPassword(String oldPassword, String newPassword) throws DecryptionException {
+        if (currenVault == null || masterKey == null || encryptedMasterKey == null) {
+            throw new IllegalStateException("No vault is currently loaded or created.");
+        }
+
+        try {
+            byte[] oldDerivedKey = cipherService.deriveKey(oldPassword, currenVault.getSalt());
+            byte[] decryptedMasterKey = cipherService.decrypt(encryptedMasterKey, oldDerivedKey, currenVault.getKeyIV());
+
+            byte[] newDerivedKey = cipherService.deriveKey(newPassword, currenVault.getSalt());
+
+            byte[] newEncryptedMasterKey = cipherService.encrypt(decryptedMasterKey, newDerivedKey, currenVault.getKeyIV());
+
+            VaultManagementService.encryptedMasterKey = newEncryptedMasterKey;
+
+            VaultFile vaultFile = new VaultFile(
+                currenVault.getSalt(),
+                currenVault.getKeyIV(),
+                currenVault.getDataIV(),
+                newEncryptedMasterKey,
+                cipherService.encrypt(jsonService.toJson(currenVault.getEntries()).getBytes(), masterKey, currenVault.getDataIV())
+            );
+            vaultFileIOService.writeVaultFile(currentVaultPath, vaultFile);
+
+        } catch (DecryptionException e) {
+            throw e;
+        } catch (CipherException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Error de cifrado al cambiar la contraseña maestra: " + e.getMessage(), e);
+        } catch (EncryptionException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Error de encriptación al cambiar la contraseña maestra: " + e.getMessage(), e);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Error de procesamiento JSON al cambiar la contraseña maestra: " + e.getMessage(), e);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Error de E/S al cambiar la contraseña maestra: " + e.getMessage(), e);
+        }
     }
 
 
