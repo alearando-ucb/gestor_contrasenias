@@ -3,6 +3,7 @@ package com.ucb.amae.vault.views;
 import com.ucb.amae.vault.App;
 import com.ucb.amae.vault.model.VaultEntry;
 import com.ucb.amae.vault.services.VaultManagementService;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 import com.ucb.amae.vault.views.components.VaultEntryCellController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -143,8 +144,18 @@ public class MainVaultController {
             dialogStage.showAndWait();
 
             if (dialogController.isConfirmed()) {
-                // TODO: Implement password change logic here in the next step
-                showStatusMessage("Lógica de cambio de contraseña pendiente.", false);
+                String oldPassword = dialogController.getCurrentPassword();
+                String newPassword = dialogController.getNewPassword();
+                try {
+                    vaultManagementService.changeMasterPassword(oldPassword, newPassword);
+                    showStatusMessage("Contraseña maestra cambiada con éxito.", false);
+                } catch (IllegalStateException e) {
+                    showStatusMessage("Error al cambiar la contraseña: " + e.getMessage(), true);
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    showStatusMessage("Error inesperado al cambiar la contraseña: " + e.getMessage(), true);
+                    e.printStackTrace();
+                }
             }
 
         } catch (IOException e) {

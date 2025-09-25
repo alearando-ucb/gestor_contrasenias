@@ -1,6 +1,8 @@
 package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.services.PasswordManagementService;
+import com.ucb.amae.vault.services.VaultManagementService;
+import com.ucb.amae.vault.services.exceptions.DecryptionException;
 import com.ucb.amae.vault.services.models.PasswordStrength;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -27,11 +29,13 @@ public class ChangePasswordDialogController {
     private boolean confirmed = false;
     private String currentPassword;
     private String newPassword;
+    private VaultManagementService vaultManagementService;
 
     @FXML
     private void initialize() {
         saveButton.setOnAction(event -> handleSave());
         cancelButton.setOnAction(event -> handleCancel());
+        this.vaultManagementService = new VaultManagementService();
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -73,6 +77,18 @@ public class ChangePasswordDialogController {
         PasswordStrength strength = PasswordManagementService.evaluatePasswordStrength(newPass);
         if (strength != PasswordStrength.FUERTE && strength != PasswordStrength.MUY_FUERTE) {
             statusLabel.setText("La nueva contraseña debe ser FUERTE o MUY_FUERTE.");
+            return;
+        }
+
+        // Validate current password by attempting to load the vault
+        try {
+            vaultManagementService.loadVault(currentPass, VaultManagementService.getCurrentVaultPath());
+        } catch (DecryptionException e) {
+            statusLabel.setText("Contraseña actual incorrecta.");
+            return;
+        } catch (IllegalStateException e) {
+            statusLabel.setText("Error de estado al verificar la contraseña actual: " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
