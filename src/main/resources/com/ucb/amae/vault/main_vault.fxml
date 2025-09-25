@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -37,10 +39,21 @@
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_LEFT" spacing="5.0">
+            <HBox alignment="CENTER_RIGHT" spacing="5.0">
                <children>
-                  <TextField fx:id="searchField" promptText="Buscar entradas..." HBox.hgrow="ALWAYS" />
-                  <Button fx:id="searchButton" mnemonicParsing="false" text="Buscar" />
+                  <HBox alignment="CENTER_LEFT" spacing="5.0" style="-fx-border-color: #A9A9A9; -fx-border-radius: 5; -fx-background-color: white;">
+                     <children>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/search.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <TextField fx:id="searchField" prefWidth="200.0" promptText="Buscar entradas..." style="-fx-background-color: transparent; -fx-border-width: 0;" />
+                     </children>
+                  </HBox>
                </children>
                <padding>
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />

@@ -6,6 +6,7 @@ import com.ucb.amae.vault.services.VaultManagementService;
 import com.ucb.amae.vault.views.components.VaultEntryCellController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -32,6 +34,8 @@ public class MainVaultController {
     private Button logoutButton;
     @FXML
     private ListView<VaultEntry> vaultEntriesListView;
+    @FXML
+    private TextField searchField;
 
     private ObservableList<VaultEntry> observableVaultEntries;
     private VaultManagementService vaultManagementService;
@@ -42,7 +46,29 @@ public class MainVaultController {
             vaultNameLabel.setText("Bóveda: " + VaultManagementService.getCurrentVaultFileName());
 
             observableVaultEntries = FXCollections.observableArrayList(VaultManagementService.getCurrentVault().getEntries());
-            vaultEntriesListView.setItems(observableVaultEntries);
+
+            FilteredList<VaultEntry> filteredData = new FilteredList<>(observableVaultEntries, p -> true);
+
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(vaultEntry -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (vaultEntry.getServiceName().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (vaultEntry.getUsername().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (vaultEntry.getUrl() != null && vaultEntry.getUrl().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    }
+                    return false;
+                });
+            });
+
+            vaultEntriesListView.setItems(filteredData);
 
             vaultEntriesListView.setCellFactory(param -> new ListCell<VaultEntry>() {
                 private FXMLLoader loader;
