@@ -9,6 +9,8 @@ import com.ucb.amae.vault.model.dto.VaultFile;
 import com.ucb.amae.vault.services.exceptions.DecryptionException;
 import com.ucb.amae.vault.services.models.PasswordStrength;
 
+import java.io.IOException;
+
 public class VaultManagementService {
 
     private static Vault currenVault;
@@ -20,11 +22,13 @@ public class VaultManagementService {
     private VaultFileIOService vaultFileIOService;
     private CipherService cipherService;
     private JsonSerializationService jsonService;
+    private ConfigurationsService configurationsService;
 
     public VaultManagementService() {
         this.vaultFileIOService = new VaultFileIOService();
         this.cipherService = new CipherService();
         this.jsonService = new JsonSerializationService();
+        this.configurationsService = new ConfigurationsService();
     }
 
     public void newVault(String password, Path filePath) {
@@ -63,7 +67,12 @@ public class VaultManagementService {
             VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
             VaultManagementService.currentVaultPath = filePath;
 
+            configurationsService.saveLastVault(filePath.toString(), filePath.getFileName().toString());
+
         } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -106,8 +115,14 @@ public class VaultManagementService {
             VaultManagementService.currentVaultFileName = filePath.getFileName().toString();
             VaultManagementService.currentVaultPath = filePath;
 
+            configurationsService.saveLastVault(filePath.toString(), filePath.getFileName().toString());
+
         } catch (JsonProcessingException e) {
             // Error al procesar el JSON (archivo corrupto)
+            // TODO: Manejar la excepción apropiadamente
+            e.printStackTrace();
+        } catch (IOException e) {
+            // Error al leer o escribir el archivo de configuración
             // TODO: Manejar la excepción apropiadamente
             e.printStackTrace();
         } catch (DecryptionException e) {

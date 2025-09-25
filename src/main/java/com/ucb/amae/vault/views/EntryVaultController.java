@@ -1,10 +1,12 @@
 package com.ucb.amae.vault.views;
 
 import com.ucb.amae.vault.App;
+import com.ucb.amae.vault.services.ConfigurationsService;
 import com.ucb.amae.vault.services.VaultFileIOService;
 import com.ucb.amae.vault.services.VaultManagementService;
 import com.ucb.amae.vault.services.exceptions.DecryptionException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,6 +19,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 public class EntryVaultController {
 
@@ -33,17 +36,42 @@ public class EntryVaultController {
     @FXML
     private Label statusLabel;
 
-    private File currentVaultFile; // To store the currently selected vault file
-    private VaultManagementService vaultManagementService = new VaultManagementService(); // Instantiate service
+    private File currentVaultFile;
+    private VaultManagementService vaultManagementService = new VaultManagementService();
+    private ConfigurationsService configurationsService = new ConfigurationsService();
 
     @FXML
     public void initialize() {
-        lastVaultNameLabel.setText("[Ninguna bóveda seleccionada]");
-        openVaultButton.setDisable(true); // Disable until a vault is selected and password entered
+        loadLastVaultInfo();
+        openVaultButton.setDisable(true);
 
         masterPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
             updateOpenVaultButtonState();
         });
+    }
+
+    private void loadLastVaultInfo() {
+        try {
+            Properties props = configurationsService.loadLastVault();
+            String lastPath = props.getProperty(ConfigurationsService.LAST_VAULT_PATH_KEY);
+            String lastName = props.getProperty(ConfigurationsService.LAST_VAULT_NAME_KEY);
+
+            if (lastPath != null && !lastPath.isEmpty()) {
+                File vaultFile = new File(lastPath);
+                if (vaultFile.exists()) {
+                    this.currentVaultFile = vaultFile;
+                    lastVaultNameLabel.setText(lastName);
+                    Platform.runLater(() -> masterPasswordField.requestFocus());
+                    updateOpenVaultButtonState();
+                }
+            }
+        } catch (IOException e) {
+            // Ignore if the properties file doesn't exist
+        }
+
+        if (this.currentVaultFile == null) {
+            lastVaultNameLabel.setText("[Ninguna bóveda seleccionada]");
+        }
     }
 
     private void updateOpenVaultButtonState() {
